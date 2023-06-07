@@ -51,7 +51,7 @@ type PartyFormInputs = z.infer<typeof partyFormSchema>
 interface GuestProps {
   id?: string
   name?: string
-  peopleQuantity?: string
+  peopleQuantity?: any
   foodId?: string
   deletedAt?: Date
 }
@@ -331,27 +331,25 @@ export function Home() {
             </thead>
             <tbody>
               {guestList.map((guest) => {
-                if (!guest.deletedAt) {
-                  return (
-                    <tr key={guest.id}>
-                      <td>{guest.name}</td>
-                      <td>{guest.peopleQuantity}</td>
-                      <td>
-                        {
-                          foodList.find((comida) => {
-                            return comida.id === guest.foodId
-                          })?.name
-                        }
-                      </td>
-                      <td>
-                        <PencilLine
-                          size={20}
-                          onClick={() => handleOpenModalEdit(guest)}
-                        />
-                      </td>
-                    </tr>
-                  )
-                }
+                return (
+                  <tr key={guest.id}>
+                    <td>{guest.name}</td>
+                    <td>{guest.peopleQuantity}</td>
+                    <td>
+                      {
+                        foodList.find((comida) => {
+                          return comida.id === guest.foodId
+                        })?.name
+                      }
+                    </td>
+                    <td>
+                      <PencilLine
+                        size={20}
+                        onClick={() => handleOpenModalEdit(guest)}
+                      />
+                    </td>
+                  </tr>
+                )
               })}
             </tbody>
           </table>
