@@ -251,10 +251,10 @@ export function Home() {
               borderRadius: '6px',
 
               fontWeight: 'bold',
-              color: '#764319',
+              color: 'green',
               background: 'transparent',
 
-              border: '2px solid #76431',
+              border: '2px solid green',
             }}
             onClick={handleEdit}
           >
