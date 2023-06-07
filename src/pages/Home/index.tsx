@@ -28,7 +28,6 @@ import { BasicButton } from '../../components/BasicButton'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { MapPin, PencilLine } from 'phosphor-react'
 import { useCallback, useEffect, useState } from 'react'
 import {
   createNewGuest,
