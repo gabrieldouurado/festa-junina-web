@@ -1,4 +1,4 @@
-# Desafio Trampay WEB
+# Aplicação para organizar a festa junina
 O projeto foi construido **vite** usando ReactJS e as bibliotecas Styled-Components para estilização, Reack Hook Forms e Zod para os formulários e validações, Axios para realização das requisições para API.
 
 ## Executando o projeto
