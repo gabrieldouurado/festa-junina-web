@@ -25,3 +25,16 @@ interface NewGuestProps {
 export async function createNewGuest(data: NewGuestProps) {
   await api.post('/guest/create', data)
 }
+
+export async function updateGuest(
+  id?: string,
+  name?: string,
+  peopleQuantity?: number,
+  foodId?: string,
+) {
+  await api.put('/guest', { id, name, peopleQuantity, foodId })
+}
+
+export async function deleteGuest(id?: string) {
+  await api.delete(`/guest/delete/${id}`)
+}

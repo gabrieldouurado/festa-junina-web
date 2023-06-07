@@ -13,6 +13,8 @@ import {
   LogoImage,
 } from './styles'
 
+import Modal from 'react-modal'
+
 import flagsImg from '../../assets/flags.png'
 import fireworksImg from '../../assets/fireworks.png'
 import fireplaceImg from '../../assets/fireplace.png'
@@ -28,8 +30,10 @@ import { PencilLine } from 'phosphor-react'
 import { useCallback, useEffect, useState } from 'react'
 import {
   createNewGuest,
+  deleteGuest,
   getAllFoods,
   getAllGuests,
+  updateGuest,
 } from '../../helpers/apiHelper'
 
 const partyFormSchema = z.object({
@@ -45,10 +49,11 @@ const partyFormSchema = z.object({
 type PartyFormInputs = z.infer<typeof partyFormSchema>
 
 interface GuestProps {
-  id: string
-  name: string
-  peopleQuantity: string
-  foodId: string
+  id?: string
+  name?: string
+  peopleQuantity?: string
+  foodId?: string
+  deletedAt?: Date
 }
 
 interface FoodProps {
@@ -69,6 +74,8 @@ export function Home() {
 
   const [foodList, setFoodList] = useState<FoodProps[]>([])
   const [guestList, setGuestList] = useState<GuestProps[]>([])
+  const [modalIsOpen, setIsOpen] = useState(false)
+  const [currentGuest, setCurrentGuest] = useState<GuestProps | null>(null)
 
   const fetchAllFoods = useCallback(async () => {
     const allFoods = await getAllFoods()
@@ -84,6 +91,15 @@ export function Home() {
     fetchAllFoods()
     fetchAllGuest()
   }, [fetchAllFoods, fetchAllGuest])
+
+  function openModal() {
+    setIsOpen(true)
+  }
+
+  function closeModal() {
+    setCurrentGuest(null)
+    setIsOpen(false)
+  }
 
   async function handleConfirmation(data: PartyFormInputs) {
     const args = {
@@ -105,12 +121,162 @@ export function Home() {
     reset()
   }
 
-  function handleEdit(guest: GuestProps) {
-    console.log(guest)
+  function handleOpenModalEdit(guest: GuestProps) {
+    setCurrentGuest(guest)
+    openModal()
+  }
+
+  async function handleEdit() {
+    try {
+      await updateGuest(
+        currentGuest?.id,
+        currentGuest?.name,
+        parseInt(currentGuest?.peopleQuantity),
+        currentGuest?.foodId,
+      )
+
+      alert('Editado com sucesso!')
+    } catch (error) {
+      alert('Ops, ocorreu um problema ao tentar editar!')
+    }
+
+    closeModal()
+    window.location.reload()
+  }
+
+  async function handleDelete() {
+    try {
+      await deleteGuest(currentGuest?.id)
+      alert('Apagado com sucesso')
+    } catch (err) {
+      alert('Ops, ocorreu um problema ao tentar apagar')
+    }
+    closeModal()
+    window.location.reload()
   }
 
   return (
     <HomeCotainer>
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Editar Informações"
+        style={{
+          overlay: {
+            backgroundColor: 'rgba(0, 0 ,0, 0.3)',
+          },
+          content: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '2px solid #3f240d',
+            borderRadius: '20px',
+            gap: '1rem',
+          },
+        }}
+      >
+        <h2 style={{ color: '#3f240d' }}>Editar Informações</h2>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.25rem',
+            width: '100%',
+            padding: '0 1rem',
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Nome/Família"
+            style={{
+              height: '3rem',
+              padding: '0.5rem',
+              border: '2px solid #764319',
+              borderRadius: '8px',
+            }}
+            onChange={(e) => {
+              setCurrentGuest({ ...currentGuest, name: e.target.value })
+            }}
+            value={currentGuest?.name}
+          />
+          <input
+            type="number"
+            min={1}
+            placeholder="Quantidade de Pessoas"
+            style={{
+              height: '3rem',
+              padding: '0.5rem',
+              border: '2px solid #764319',
+              borderRadius: '8px',
+            }}
+            onChange={(e) => {
+              setCurrentGuest({
+                ...currentGuest,
+                peopleQuantity: e.target.value,
+              })
+            }}
+            value={currentGuest?.peopleQuantity}
+          />
+          <select
+            style={{
+              height: '3rem',
+              padding: '0.5rem',
+              border: '2px solid #764319',
+              borderRadius: '8px',
+            }}
+            onChange={(e) => {
+              setCurrentGuest({ ...currentGuest, foodId: e.target.value })
+            }}
+            value={currentGuest?.foodId}
+          >
+            {foodList.map((comida) => {
+              return (
+                <option key={comida.id} value={comida.id}>
+                  {comida.name}
+                </option>
+              )
+            })}
+          </select>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            gap: '0.5rem',
+          }}
+        >
+          <button
+            style={{
+              padding: '0.75rem 1.25rem',
+              borderRadius: '6px',
+
+              fontWeight: 'bold',
+              color: '#764319',
+              background: 'transparent',
+
+              border: '2px solid #76431',
+            }}
+            onClick={handleEdit}
+          >
+            Editar
+          </button>
+          <button
+            style={{
+              padding: '0.75rem 1.25rem',
+              borderRadius: '6px',
+
+              fontWeight: 'bold',
+              color: 'red',
+              background: 'transparent',
+
+              border: '2px solid red',
+            }}
+            onClick={handleDelete}
+          >
+            Excluir
+          </button>
+        </div>
+      </Modal>
       <HomeHeader>
         <FlagsImage src={flagsImg} alt="" />
         <FireworksImage src={fireworksImg} alt="" />
@@ -121,7 +287,7 @@ export function Home() {
           <div>
             <PeopleOrFamily
               type="text"
-              placeholder="Nome/Familia"
+              placeholder="Nome/Família"
               {...register('name')}
             />
 
@@ -165,22 +331,27 @@ export function Home() {
             </thead>
             <tbody>
               {guestList.map((guest) => {
-                return (
-                  <tr key={guest.id}>
-                    <td>{guest.name}</td>
-                    <td>{guest.peopleQuantity}</td>
-                    <td>
-                      {
-                        foodList.find((comida) => {
-                          return comida.id === guest.foodId
-                        })?.name
-                      }
-                    </td>
-                    <td>
-                      <PencilLine size={20} onClick={() => handleEdit(guest)} />
-                    </td>
-                  </tr>
-                )
+                if (!guest.deletedAt) {
+                  return (
+                    <tr key={guest.id}>
+                      <td>{guest.name}</td>
+                      <td>{guest.peopleQuantity}</td>
+                      <td>
+                        {
+                          foodList.find((comida) => {
+                            return comida.id === guest.foodId
+                          })?.name
+                        }
+                      </td>
+                      <td>
+                        <PencilLine
+                          size={20}
+                          onClick={() => handleOpenModalEdit(guest)}
+                        />
+                      </td>
+                    </tr>
+                  )
+                }
               })}
             </tbody>
           </table>
