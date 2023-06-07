@@ -11,6 +11,7 @@ import {
   PeopleContribuition,
   GuestList,
   LogoImage,
+  FlagDateImage,
 } from './styles'
 
 import Modal from 'react-modal'
@@ -18,6 +19,7 @@ import Modal from 'react-modal'
 import flagsImg from '../../assets/flags.png'
 import fireworksImg from '../../assets/fireworks.png'
 import fireplaceImg from '../../assets/fireplace.png'
+import flagDateImg from '../../assets/flag-with-date.png'
 import logoImg from '../../assets/logo.png'
 
 import { BasicFrom } from '../../components/BasicForm'
@@ -26,7 +28,7 @@ import { BasicButton } from '../../components/BasicButton'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { PencilLine } from 'phosphor-react'
+import { MapPin, PencilLine } from 'phosphor-react'
 import { useCallback, useEffect, useState } from 'react'
 import {
   createNewGuest,
@@ -356,6 +358,7 @@ export function Home() {
         </GuestList>
       </HomeContent>
       <HomeFooter>
+        <FlagDateImage src={flagDateImg} alt="" />
         <FireplaceImage src={fireplaceImg} alt="" />
       </HomeFooter>
     </HomeCotainer>

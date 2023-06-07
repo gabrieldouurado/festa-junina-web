@@ -62,9 +62,8 @@ export const PeopleContribuition = styled.select`
 
 export const HomeFooter = styled.footer`
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-
+  align-items: center;
+  justify-content: space-between;
   /* border: 1px solid green; */
 `
 
@@ -143,6 +142,14 @@ export const GuestList = styled.div`
       }
     }
   }
+`
+
+export const FlagDateImage = styled.img`
+  width: 10vw;
+  max-width: 10rem;
+  object-fit: contain;
+
+  margin-left: 2.5rem;
 `
 
 export const FireplaceImage = styled.img`
