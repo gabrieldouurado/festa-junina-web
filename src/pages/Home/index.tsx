@@ -37,6 +37,7 @@ import {
   getAllGuests,
   updateGuest,
 } from '../../helpers/apiHelper'
+import ReactLoading from 'react-loading'
 
 const partyFormSchema = z.object({
   name: z.string().nonempty('Opa! Diz pra gente quem é você'),
@@ -78,15 +79,21 @@ export function Home() {
   const [guestList, setGuestList] = useState<GuestProps[]>([])
   const [modalIsOpen, setIsOpen] = useState(false)
   const [currentGuest, setCurrentGuest] = useState<GuestProps | null>(null)
+  const [IsLoading, setIsLoading] = useState<Boolean>(false)
+  const [inviteIsLoading, setInviteIsLoading] = useState<Boolean>(false)
 
   const fetchAllFoods = useCallback(async () => {
+    setIsLoading(true)
     const allFoods = await getAllFoods()
     setFoodList(allFoods)
+    setIsLoading(false)
   }, [])
 
   const fetchAllGuest = useCallback(async () => {
+    setIsLoading(true)
     const allGuests = await getAllGuests()
     setGuestList(allGuests)
+    setIsLoading(false)
   }, [])
 
   useEffect(() => {
@@ -104,6 +111,7 @@ export function Home() {
   }
 
   async function handleConfirmation(data: PartyFormInputs) {
+    setInviteIsLoading(true)
     const args = {
       name: data.name,
       peopleQuantity: parseInt(data.peopleQuantity),
@@ -112,8 +120,10 @@ export function Home() {
 
     try {
       await createNewGuest(args)
+      setInviteIsLoading(false)
       alert(`Presença Confirmada\nAté dia 24/06 ${args.name}`)
     } catch (err) {
+      setInviteIsLoading(false)
       alert(
         'Ops, houve um erro para confirmar sua presença. Tente novamente mais tarde',
       )
@@ -319,43 +329,57 @@ export function Home() {
             <span>{errors.peopleQuantity.message}</span>
           )}
           {errors.foodId && <span>{errors.foodId.message}</span>}
-          <BasicButton>Confirmar Presença</BasicButton>
+          {inviteIsLoading ? (
+            <div style={{ margin: '1.5rem' }}>
+              <ReactLoading type="spinningBubbles" color="#764319" />
+            </div>
+          ) : (
+            <BasicButton disabled={inviteIsLoading}>
+              Confirmar Presença
+            </BasicButton>
+          )}
         </BasicFrom>
-        <GuestList>
-          <table>
-            <thead>
-              <tr>
-                <th>Nome/Família</th>
-                <th>Qnt. de Pessoas</th>
-                <th>O que irá levar</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {guestList.map((guest) => {
-                return (
-                  <tr key={guest.id}>
-                    <td>{guest.name}</td>
-                    <td>{guest.peopleQuantity}</td>
-                    <td>
-                      {
-                        foodList.find((comida) => {
-                          return comida.id === guest.foodId
-                        })?.name
-                      }
-                    </td>
-                    <td>
-                      <PencilLine
-                        size={20}
-                        onClick={() => handleOpenModalEdit(guest)}
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </GuestList>
+        {IsLoading ? (
+          <div style={{ margin: '1.5rem' }}>
+            <ReactLoading type="spinningBubbles" color="#764319" />
+          </div>
+        ) : (
+          <GuestList>
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome/Família</th>
+                  <th>Qnt. de Pessoas</th>
+                  <th>O que irá levar</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {guestList.map((guest) => {
+                  return (
+                    <tr key={guest.id}>
+                      <td>{guest.name}</td>
+                      <td>{guest.peopleQuantity}</td>
+                      <td>
+                        {
+                          foodList.find((comida) => {
+                            return comida.id === guest.foodId
+                          })?.name
+                        }
+                      </td>
+                      <td>
+                        <PencilLine
+                          size={20}
+                          onClick={() => handleOpenModalEdit(guest)}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </GuestList>
+        )}
       </HomeContent>
       <HomeFooter>
         <FlagDateImage src={flagDateImg} alt="" />
